@@ -289,6 +289,7 @@ def main():
     -i                  ignore history
     -n                  do not write to history
     -o                  overwrite if the file already has lyrics
+    -t                  test, do not write lyrics to file, but print to console
     -h                  show this
     --rm_explicit       remove the "[Explicit]" lyrics warning from the songs title tag"""
     args = []
