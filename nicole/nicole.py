@@ -102,6 +102,7 @@ class Nicole:
         # remove spaces, from the title
         for c in [' ', '-', ',', '.', '\'', '"', '°', '`', '´', '/', '!', '?', '#', '*']:
             title = title.replace(c, '')
+            artist = artist.replace(c, '')
 
         # replace some stuff
         old = ['ä', 'ö', 'ü', '&']
@@ -109,6 +110,7 @@ class Nicole:
 
         for i in range(len(old)):
             title = title.replace(old[i], new[i])
+            artist = artist.replace(old[i], new[i])
 
         return "https://azlyrics.com/lyrics/" + artist + '/' + title + ".html"
 
