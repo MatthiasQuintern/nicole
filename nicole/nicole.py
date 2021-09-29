@@ -90,17 +90,17 @@ class Nicole:
         title = title.casefold()
 
         # remove 'a' or 'the' from the artist
-        if artist[0:1] == "a ":
+        if artist[0:2] == "a ":
             artist = artist[2:]
         elif artist[0:4] == "the ":
             artist = artist[4:]
 
         # remove anything in square bracketrs (eg [Explicit])
-        for match in re.finditer(r"[.*]", title):
+        for match in re.finditer(r"\[.*\]", title):
             title = title.replace(match.group(), "")
 
         # remove spaces, from the title
-        for c in [' ', '-', ',', '.', '\'', '"', '°', '`', '´', '/', '!', '?', '#', '*']:
+        for c in [' ', '-', ',', '.', '\'', '"', '°', '`', '´', '/', '!', '?', '#', '*', '(', ')']:
             title = title.replace(c, '')
             artist = artist.replace(c, '')
 
