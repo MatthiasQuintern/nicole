@@ -52,5 +52,7 @@ python3 -m pip install .
 ```
 You can also install it system-wide using `sudo python3 -m pip install.`
 
+After installing, you can use it like this: `nicole -ior -d ~/music/artist --rm_explicit`
+
 ## Importand Notice
 This software comes with no warranty!
