@@ -92,7 +92,7 @@ class Nicole:
         # remove 'a' or 'the' from the artist
         if artist[0:1] == "a ":
             artist = artist[2:]
-        elif artist[0:3] == "the ":
+        elif artist[0:4] == "the ":
             artist = artist[4:]
 
         # remove anything in square bracketrs (eg [Explicit])
