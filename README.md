@@ -1,14 +1,20 @@
 # Nicole - Lyrics Scraper
 
 ## Overview
-Nicole is a program that searches for lyrics and writes them into the mp3-tag "USLT".
+Nicole is a program that searches for lyrics and writes them into the mp3-tag. 
 There is a 5 second delay between each request to azlyrics.com because the site will block your ip if there are too many requests.
 
+### Files
+Nicole supports FLAC and mp3 files. Other files can not be edited (as of now).
+Files that do not have a .flac or .mp3 extension are skipped automatically.
+
 ### History
-Nicole can create a history of all files that were processed in `~/.configs/nicole`.
+Nicole creates a history of all files that were processed in `~/.configs/nicole`.
 If a file is in the history, it will be skipped unless `ignore_history=True`.
 If the lyrics for a file can not be obtained, it is added to `~/.configs/nicole/failed_files`.
 Those files are not skipped, the file only exists so that you can see which lyrics were not downloaded.
+
+If you dont want your files in the history, add the `-n` option.
 
 ### azlyrics
 Nicole creates a azlyrics.com url from the title and artist mp3-tags of the file.
