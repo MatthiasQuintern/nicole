@@ -2,7 +2,8 @@
 
 ## Overview
 Nicole is a program that searches for lyrics and writes them into the mp3-tag. 
-There is a 5 second delay between each request to azlyrics.com because the site will block your ip if there are too many requests.
+
+Unfortunately, there needs to be a 5 second delay between each request to azlyrics.com because the site will block your ip for a while if you send many requests.
 
 ### Files
 Nicole supports FLAC and mp3 files. Other files can not be edited (as of now).
@@ -19,7 +20,7 @@ Those files are not skipped, the file only exists so that you can see which lyri
 If you dont want your files in the history, add the `-n` option.
 
 ### azlyrics
-Nicole creates a azlyrics.com url from the title and artist mp3-tags of the file.
+Nicole creates an azlyrics.com url from the "title" and "artist" tags of the file.
 The lyrics are extracted from the html document using regex.
 
 
@@ -35,7 +36,7 @@ Command line options:
 - `-t` test, do not write lyrics to file, but print to console
 
 - `-h` show this
-- `--rm_explicit` remove the "[Explicit]" lyrics warning from the songs title tag
+- `--rm_explicit` remove the "[Explicit]" lyrics warning from the song's title tag
 
 If you do not specify a directory or file, the program will ask you if you want to use the current working directory.
 
