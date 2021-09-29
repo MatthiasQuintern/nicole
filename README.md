@@ -17,8 +17,8 @@ The lyrics are extracted from the html document using regex.
 
 ## Usage
 Command line options:
-- `-d` [directory] process directory [directory]
-- `-f` [file] process file [file]
+- `-d [directory]` process directory [directory]
+- `-f [file]` process file [file]
 - `-r` go through directories recursively
 - `-s` silent, no command-line output
 - `-i` ignore history
