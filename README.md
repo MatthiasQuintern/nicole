@@ -17,16 +17,14 @@ The lyrics are extracted from the html document using regex.
 
 ## Usage
 Command line options:
-```man
--d [directory] process directory [directory]
--f [file] process file [file]
--r go through directories recursively
--s silent, no command-line output
--i ignore history
--n do not write to history
--o overwrite if the file already has a comment
--h show this
-```
+- `-d` [directory] process directory [directory]
+- `-f` [file] process file [file]
+- `-r` go through directories recursively
+- `-s` silent, no command-line output
+- `-i` ignore history
+- `-n` do not write to history
+- `-o` overwrite if the file already has a comment
+- `-h` show this
 If you do not specify a directory or file, the program will ask you if you want to use the current working directory.
 
 ## Installation
