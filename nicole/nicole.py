@@ -247,8 +247,6 @@ class Nicole:
                         audio["TITLE"] = title
                         audio.save()
                         print(f"Removed '{word}' from the title.")
-        print(audio.pprint())
-
 
         # currently the only supported site
         if self.lyrics_site == "azlyrics":
