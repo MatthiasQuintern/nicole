@@ -7,6 +7,8 @@ There is a 5 second delay between each request to azlyrics.com because the site 
 ### Files
 Nicole supports FLAC and mp3 files. Other files can not be edited (as of now).
 Files that do not have a .flac or .mp3 extension are skipped automatically.
+- mp3: lyrics are stored in "USLT" tag as "lyrics-   "
+- flac: lyrics are stored as vorbis-comment with key "LYRICS"
 
 ### History
 Nicole creates a history of all files that were processed in `~/.configs/nicole`.

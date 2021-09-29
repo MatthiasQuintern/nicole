@@ -252,7 +252,7 @@ class Nicole:
                     if self.write_history and file not in self.history:
                         self.history.append(file)
 
-                return (True, f"✓ Written text to {artist} - {title}")
+                return (True, f"Written lyrics to {artist} - {title}")
             else:
                 return (False, lyrics)  # lyrics is error message here
 
@@ -344,7 +344,7 @@ Command line options:
         try:
             nicole.process_dir(directory)
         except KeyboardInterrupt:
-            print("KeyboardInterrupt: Ending nicole.")
+            print("")
     else:
         use_wdir = input("No file or directory given. Use working directory? (y/n): ")
         if use_wdir in "yY":
