@@ -169,9 +169,9 @@ class Nicole:
 
                     # add to history
                     if self.write_history:
-                        if success and entry not in self.history:
+                        if entry not in self.history:
                             self.history.append(entry)
-                        elif not success:
+                        if not success:
                             self.failed.append(entry)
 
                     if not self.silent:
