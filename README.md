@@ -1,5 +1,5 @@
 # Nicole - Lyrics Scraper
-**N**ew-**I**trepid-**C**hief-**O**f-**L**yrics-**E**mbedders (obviously)
+**N**ew-**I**ntrepid-**C**hief-**O**f-**L**yrics-**E**mbedders (obviously)
 
 ## Overview
 Nicole is a program that searches for lyrics and writes them into the mp3-tag. 
