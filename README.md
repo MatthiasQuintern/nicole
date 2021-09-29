@@ -25,6 +25,7 @@ Command line options:
 - `-n` do not write to history
 - `-o` overwrite if the file already has a comment
 - `-h` show this
+
 If you do not specify a directory or file, the program will ask you if you want to use the current working directory.
 
 ## Installation
