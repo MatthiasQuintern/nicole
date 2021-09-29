@@ -1,4 +1,4 @@
-from mutagen import easyid3, id3, flac
+from mutagen import easyid3, id3
 import urllib.request as ur
 from os import path, getcwd, listdir, mkdir
 from time import sleep
@@ -12,6 +12,7 @@ Der Name Nicole ist frei erfunden und hat keine Bedeutung.
 Jeglicher Zusammenhang mit einer Website der DHL wird hiermit ausdrücklich ausgeschlossen.
 """
 
+# TODO: flac, testing...
 
 class Nicole:
     """
@@ -94,7 +95,7 @@ class Nicole:
             artist = artist[4:]
 
         # remove spaces, from the title
-        for c in [' ', '-', ',', '.', '\'', '"', '°', '`', '´', '/', '!', '?', '#', '*']:
+        for c in [' ', '-', ',', '.', '\'', '/']:
             title = title.replace(c, '')
 
         # replace some stuff
@@ -114,10 +115,10 @@ class Nicole:
         html = None
         try:
             html = str(ur.urlopen(url).read())
-            sleep(self.delay) # azlyrics blocks requests if there is no delay
         except Exception:
-            sleep(self.delay) # azlyrics blocks requests if there is no delay
-            return (False, f"Could not access url: {url}")
+            # if not self.silent:
+            #     print("✕ Error with url: ", url)
+            return
 
         lyrics = None
         match = re.search(r"<!\-\- Usage of azlyrics.com content by any third\-party lyrics provider is prohibited by our licensing agreement. Sorry about that. \-\->.+?</div>", html)
@@ -136,17 +137,16 @@ class Nicole:
             for tag in re.finditer(r"</.+>", lyrics):
                 lyrics = lyrics.replace(tag.group(), "")
 
-            return (True, lyrics)
-        return (False, f"Could not find lyrics in html: {url}")
+        return lyrics
 
     def process_dir(self, directory):
         if not path.isabs(directory):
             directory = path.normpath(getcwd() + "/" + directory)
         if not path.isdir(directory):
-            print(f"\nInvalid directory: '{directory}'")
+            print(f"Invalid directory: '{directory}'")
             return 1
         if not self.silent:
-            print("\nProcessing directory: " + directory)
+            print("Processing directory: " + directory)
 
 
         for entry in listdir(directory):
@@ -156,22 +156,8 @@ class Nicole:
                 extension = path.splitext(entry)[1]
 
                 # if sound file with mp3 tags
-                if extension in [".mp3", ".flac"]:
-                    success, message = self.process_file(entry)
-
-                    # add to history
-                    if self.write_history:
-                        if success and entry not in self.history:
-                            self.history.append(entry)
-                        elif not success:
-                            self.failed.append(entry)
-
-                    if not self.silent:
-                        if success:
-                            print(f"✓ {entry}") 
-                        else:
-                            print(f"✕ {entry}")
-                        print("   " + message)
+                if extension in [".mp3", ".flac", ".wav"] and (self.ignore_history or entry not in self.history):
+                    self.process_file(entry)
 
 
             elif path.isdir(entry) and self.recursive:
@@ -181,82 +167,47 @@ class Nicole:
         if not path.isabs(file):
             file = path.normpath(getcwd() + "/" + file)
         if not path.isfile(file):
-            return (False, f"Invalid filename: '{file}'")
-        
-        if not self.ignore_history and file in self.history:
-            return (False, f"Already processed by nicole.")
+            print(f"Invalid filename: '{file}'")
+            return 1
+        audio = easyid3.EasyID3(file)
+        artist = audio["artist"][0]
+        title = audio["title"][0]
 
-        audio = None
-        artist = None
-        title = None
+        audio = id3.ID3(file)
 
-        has_lyrics = False
+        # print(audio.pprint())
 
-        # mp3/id3
-        if ".mp3" in file:
-            try:
-                audio = easyid3.EasyID3(file)
-                artist = audio["artist"][0]
-                title = audio["title"][0]
-
-
-                audio = id3.ID3(file)
-
-                has_lyrics = not (audio.getall("USLT") == [])
-            except id3.ID3NoHeaderError:
-                return (False, f"No id3 header found.")
-        # flac
-        elif ".flac" in file:
-            try:
-                audio = flac.FLAC(file)
-
-                artist = audio.get("ARTIST")
-                if artist:
-                    artist = artist[0]
-                title = audio.get("TITLE")
-                if title:
-                    title = title[0]
-
-                has_lyrics = not (audio.get("LYRICS") == None)
-            except flac.FLACNoHeaderError:
-                return (False, f"No FLAC comment header found.")
-
-        # dont proceed when not overwrite and audio has tags
-        if not self.overwrite_tag and has_lyrics:
-            return (False, f"Already has lyrics")
-
-        # dont proceed when invalid audio/artist/title
-        if not (audio and artist and title):
-            return (False, f"Could not get tags.")
-
-        # currently the only supported site
         if self.lyrics_site == "azlyrics":
             url = self.get_url_azlyrics(artist, title)
             
-            success, lyrics = self.get_lyrics_azlyrics(url)
-            if success:
+            lyrics = self.get_lyrics_azlyrics(url)
+            if lyrics:
+                # lyrics.encode("UTF16", "backslashreplace")
+                lyrics.encode()
                 if self.test_run:
                     print(f"{artist} - {title}:\n{lyrics}\n\n")
-                # write to tags
-                else:
-                    if type(audio) == id3.ID3:
-                        audio.add(id3.USLT(encoding=id3.Encoding.UTF8, lang="   ", text=lyrics))
-                        audio.save(v2_version=4)
-                    elif type(audio) == flac.FLAC:
-                        audio["LYRICS"] = lyrics
-                        audio.save()
-                    else:
-                        return (False, f"Could not write lyrics.")
+                elif self.overwrite_tag or audio.getall("USLT") == []:
+                    # write to tags
+                    audio.add(id3.USLT(encoding=id3.Encoding.UTF8, lang="   ", text=lyrics))
+                    audio.save(v2_version=4)
+                    if not self.silent:
+                        print(f"✓ Written text to {artist} - {title}")
 
                     # add to history
                     if self.write_history and file not in self.history:
                         self.history.append(file)
+                else:
+                    print(f"Already has lyrics: {artist} - {title}")
 
-                return (True, f"✓ Written text to {artist} - {title}")
+                sleep(self.delay) # azlyrics blocks requests if there is no delay
             else:
-                return (False, lyrics)  # lyrics is error message here
+                # add to failed
+                if self.write_history and file not in self.failed:
+                    self.failed.append(file)
 
-        return (False, "Failed for unknown reason.")
+                if not self.silent:
+                    print(f"✕ Could not get lyrics for {artist} - {title}")
+                    pass
 
 
 def main():
@@ -282,7 +233,7 @@ Command line options:
 
             elif "-" in arg:
                 # check if option with arg, if yes add tuple to args
-                if len(argv) > i + 1 and argv[i+1][0] != "-":
+                if len(argv) > i + 1 and "-" not in argv[i+1]:
                     args.append((arg.replace("-", ""), argv[i+1]))
                     i += 1
                 else:
@@ -333,18 +284,9 @@ Command line options:
 
     # start with file or directory
     if file:
-        success, message = nicole.process_file(file)
-        if not nicole.silent:
-            if success:
-                print(f"✓ {file}") 
-            else:
-                print(f"✕ {file}")
-            print("   " + message)
+        nicole.process_file(file)
     elif directory:
-        try:
-            nicole.process_dir(directory)
-        except KeyboardInterrupt:
-            print("KeyboardInterrupt: Ending nicole.")
+        nicole.process_dir(directory)
     else:
         use_wdir = input("No file or directory given. Use working directory? (y/n): ")
         if use_wdir in "yY":
