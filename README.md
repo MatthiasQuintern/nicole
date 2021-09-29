@@ -31,8 +31,9 @@ Command line options:
 - `-s` silent, no command-line output
 - `-i` ignore history
 - `-n` do not write to history
-- `-o` overwrite if the file already has a comment
+- `-o` overwrite if the file already a lyrics
 - `-h` show this
+- `--rm_explicit` remove the "[Explicit]" lyrics warning from the songs title tag
 
 If you do not specify a directory or file, the program will ask you if you want to use the current working directory.
 

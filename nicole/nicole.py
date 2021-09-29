@@ -27,7 +27,7 @@ class Nicole:
         Nicole creates a azlyrics url from the title and artist mp3-tags of the file.
         The lyrics are extracted from the html document using regex.
     """
-    def __init__(self, test_run=False, silent=False, write_history=True, ignore_history=False, overwrite_tag=False, recursive=False):
+    def __init__(self, test_run=False, silent=False, write_history=True, ignore_history=False, overwrite_tag=False, recursive=False, rm_explicit=False):
         self.test_run = test_run
         self.silent = silent
 
@@ -44,6 +44,8 @@ class Nicole:
         self.failed = []  # All files that failed
         if not self.ignore_history:
             self._load_history()
+
+        self.rm_explicit = rm_explicit
 
     def __del__(self):
         if self.write_history:
@@ -92,6 +94,10 @@ class Nicole:
             artist = artist[2:]
         elif artist[0:3] == "the ":
             artist = artist[4:]
+
+        # remove anything in square bracketrs (eg [Explicit])
+        for match in re.finditer(r"[.*]", title):
+            title = title.replace(match.group(), "")
 
         # remove spaces, from the title
         for c in [' ', '-', ',', '.', '\'', '"', '°', '`', '´', '/', '!', '?', '#', '*']:
@@ -195,12 +201,10 @@ class Nicole:
         # mp3/id3
         if ".mp3" in file:
             try:
-                audio = easyid3.EasyID3(file)
-                artist = audio["artist"][0]
-                title = audio["title"][0]
-
-
                 audio = id3.ID3(file)
+
+                artist = audio.getall("TPE1")
+                title = audio.getall("TIT2")
 
                 has_lyrics = not (audio.getall("USLT") == [])
             except id3.ID3NoHeaderError:
@@ -211,15 +215,16 @@ class Nicole:
                 audio = flac.FLAC(file)
 
                 artist = audio.get("ARTIST")
-                if artist:
-                    artist = artist[0]
                 title = audio.get("TITLE")
-                if title:
-                    title = title[0]
 
                 has_lyrics = not (audio.get("LYRICS") == None)
             except flac.FLACNoHeaderError:
                 return (False, f"No FLAC comment header found.")
+
+        if artist:
+            artist = str(artist[0])
+        if title:
+            title = str(title[0])
 
         # dont proceed when not overwrite and audio has tags
         if not self.overwrite_tag and has_lyrics:
@@ -228,6 +233,22 @@ class Nicole:
         # dont proceed when invalid audio/artist/title
         if not (audio and artist and title):
             return (False, f"Could not get tags.")
+
+        if self.rm_explicit:
+            for word in ["[Explicit]", "[exlicit]"]:
+                if word in title:
+                    title = str(title).replace(word, "")
+                    title = title.strip(" ")
+                    if type(audio) == id3.ID3:
+                        audio.setall("TIT2", [id3.TIT2(text=title)])
+                        audio.save()
+                        print(f"Removed '{word}' from the title.")
+                    elif type(audio) == flac.FLAC:
+                        audio["TITLE"] = title
+                        audio.save()
+                        print(f"Removed '{word}' from the title.")
+        print(audio.pprint())
+
 
         # currently the only supported site
         if self.lyrics_site == "azlyrics":
@@ -260,17 +281,16 @@ class Nicole:
 
 
 def main():
-    helpstring = """
-Command line options:
-    -d [directory] process directory [directory]
-    -f [file] process file [file]
-    -r go through directories recursively
-    -s silent, no command-line output
-    -i ignore history
-    -n do not write to history
-    -o overwrite if the file already has a comment
-    -h show this
-"""
+    helpstring = """Command line options:
+    -d [directory]      process directory [directory]
+    -f [file]           process file [file]
+    -r                  go through directories recursively
+    -s                  silent, no command-line output
+    -i                  ignore history
+    -n                  do not write to history
+    -o                  overwrite if the file already has lyrics
+    -h                  show this
+    --rm_explicit       remove the "[Explicit]" lyrics warning from the songs title tag"""
     args = []
     if len(argv) > 1:
         # iterate over argv list and extract the args
@@ -303,6 +323,7 @@ Command line options:
             "o": False,
             "r": False,
             "h": False,
+            "rm_explicit": False,
             }
 
     directory = None
@@ -329,7 +350,7 @@ Command line options:
         return 0
     
     # create nicole instance
-    nicole = Nicole(test_run=options["t"], silent=options["s"], write_history=options["n"], ignore_history=options["i"], overwrite_tag=options["o"], recursive=options["r"])
+    nicole = Nicole(test_run=options["t"], silent=options["s"], write_history=options["n"], ignore_history=options["i"], overwrite_tag=options["o"], recursive=options["r"], rm_explicit=options["rm_explicit"])
 
     # start with file or directory
     if file:
