@@ -50,8 +50,6 @@ class Nicole:
     def __del__(self):
         if self.write_history:
             self._write_history()
-        else:
-            print("NO")
 
     def _load_history(self):
         config_path = path.expanduser("~") + "/.config/nicole/"
@@ -80,10 +78,11 @@ class Nicole:
         for file in self.failed:
             failed_file.write(file + "\n")
         failed_file.close()
-        
-    def get_url_azlyrics(self, artist:str, title:str):
+
+    def get_urls_azlyrics(self, artist:str, title:str):
         """
         Create a azlyrics html from the artist and title
+        If the title contains paranthesis or äüö, there will be multiple versions, one that contains the (...)öäü and one that doesn't.
         """
         # convert to lower case
         artist = artist.casefold()
@@ -99,55 +98,103 @@ class Nicole:
         for match in re.finditer(r"\[.*\]", title):
             title = title.replace(match.group(), "")
 
-        # remove spaces, from the title
-        for c in [' ', '-', ',', '.', '\'', '"', '°', '`', '´', '/', '!', '?', '#', '*', '(', ')']:
-            title = title.replace(c, '')
-            artist = artist.replace(c, '')
+        titles = [title]
 
-        # replace some stuff
-        old = ['ä', 'ö', 'ü', '&']
-        new = ['a', 'o', 'u', "and"]
-        # new2 = ['', '', '', "and"]
+        # if title has(), create one version with and one without them
+        if re.search(r"\(.*\)", title):
+            for match in re.finditer(r"\(.*\)", title):
+                title = title.replace(match.group(), "")
+            titles.append(title)
 
-        for i in range(len(old)):
-            title = title.replace(old[i], new[i])
-            artist = artist.replace(old[i], new[i])
+        # some special chars
+        toNone = [' ', '-', ',', '.', '…', '\'', '"', '°', '`', '´', '/', '!', '?', '#', '*', '(', ')']
+        for c in toNone:
+            artist = artist.replace(c, "")
 
-        return "https://azlyrics.com/lyrics/" + artist + '/' + title + ".html"
+        #
+        # replace umlaute, create multiple versions
+        #
+        old = ['ä', 'ö', 'ü', 'ß', '&']
+        new1 = ['a', 'o', 'u', 'ss', "and"]
+        new2 = ['', '', '', '', "and"]
 
-    def get_lyrics_azlyrics(self, url):
+        # in artist
+        if any(c in old for c in artist):
+            for i in range(len(old)):
+                artist = artist.replace(old[i], new1[i])
+        # multiple loops are needed since the array might grow
+
+        # umlaute
+        for n in range(len(titles)):
+            if any(c in old for c in titles[n]):
+                # replace titles[n] with the first version and append the second
+                title2 = titles[n]
+                for i in range(len(old)):
+                    titles[n] = titles[n].replace(old[i], new1[i])
+                    title2 = title2.replace(old[i], new2[i])
+                titles.append(title2)
+
+        # features
+        for title in titles:
+            match = re.search(r"fe?a?t\.?.*", title)
+            if match:
+                titles.append(title.replace(match.group(), ""))
+
+        # spaces, etc
+        for n in range(len(titles)):
+            for c in toNone:
+                titles[n] = titles[n].replace(c, '')
+
+        #
+        # create urls
+        #
+        urls = []
+        for title in titles:
+            urls.append("https://azlyrics.com/lyrics/" + artist + '/' + title + ".html")
+        print(urls)
+        return urls
+
+
+    def get_lyrics_azlyrics(self, urls):
         """
         Extract the lyrics from the html
         """
-        # visit the url
-        html = None
-        try:
-            html = str(ur.urlopen(url).read().decode("utf-8"))
-            sleep(self.delay) # azlyrics blocks requests if there is no delay
-        except Exception:
-            sleep(self.delay) # azlyrics blocks requests if there is no delay
-            return (False, f"Could not access url: {url}")
 
-        lyrics = None
-        match = re.search(r"<!\-\- Usage of azlyrics.com content by any third\-party lyrics provider is prohibited by our licensing agreement. Sorry about that. \-\->(.|\n)+?</div>", html)
-        if match:
-            lyrics = match.group()
-            for key, value in {
-                "<!-- Usage of azlyrics.com content by any third-party lyrics provider is prohibited by our licensing agreement. Sorry about that. -->": "",
-                "</div>": "",
-                "\n": "",
-                "<br>": "\n",
-            }.items():
-                lyrics = lyrics.replace(key, value)
+        message = ""
+        for url in urls:
+            # visit the url
+            html = None
+            try:
+                html = str(ur.urlopen(url).read().decode("utf-8"))
+                sleep(self.delay) # azlyrics blocks requests if there is no delay
+            except Exception:
+                sleep(self.delay) # azlyrics blocks requests if there is no delay
+                message += f"Could not access url: {url}\n    "
+                continue
 
-            # remove all html tags
-            for tag in re.finditer(r"<.+>", lyrics):
-                lyrics = lyrics.replace(tag.group(), "")
-            for tag in re.finditer(r"</.+>", lyrics):
-                lyrics = lyrics.replace(tag.group(), "")
+            lyrics = None
+            match = re.search(r"<!\-\- Usage of azlyrics.com content by any third\-party lyrics provider is prohibited by our licensing agreement. Sorry about that. \-\->(.|\n)+?</div>", html)
+            if match:
+                lyrics = match.group()
+                for key, value in {
+                    "<!-- Usage of azlyrics.com content by any third-party lyrics provider is prohibited by our licensing agreement. Sorry about that. -->": "",
+                    "</div>": "",
+                    "\n": "",
+                    "<br>": "\n",
+                }.items():
+                    lyrics = lyrics.replace(key, value)
 
-            return (True, lyrics)
-        return (False, f"Could not find lyrics in html: {url}")
+                # remove all html tags
+                for tag in re.finditer(r"<.+>", lyrics):
+                    lyrics = lyrics.replace(tag.group(), "")
+                for tag in re.finditer(r"</.+>", lyrics):
+                    lyrics = lyrics.replace(tag.group(), "")
+
+                return (True, lyrics)
+
+            message += f"Could not lyrics in html for {url}\n    "
+        message = message.strip(" \n")
+        return (False, message)
 
     def process_dir(self, directory):
         if not path.isabs(directory):
@@ -192,7 +239,7 @@ class Nicole:
             file = path.normpath(getcwd() + "/" + file)
         if not path.isfile(file):
             return (False, f"Invalid filename: '{file}'")
-        
+
         if not self.ignore_history and file in self.history:
             return (False, f"Already processed by nicole.")
 
@@ -254,9 +301,9 @@ class Nicole:
 
         # currently the only supported site
         if self.lyrics_site == "azlyrics":
-            url = self.get_url_azlyrics(artist, title)
+            urls = self.get_urls_azlyrics(artist, title)
             
-            success, lyrics = self.get_lyrics_azlyrics(url)
+            success, lyrics = self.get_lyrics_azlyrics(urls)
             if success:
                 if self.test_run:
                     print(f"{artist} - {title}:\n{lyrics}\n\n")
@@ -283,6 +330,9 @@ class Nicole:
 
 
 def main():
+    print("Nicole version 1.1")
+    # print("Get updates here: https://github.com/MatthiasQuintern/nicole")
+
     helpstring = """Command line options:
     -d [directory]      process directory [directory]
     -f [file]           process file [file]
@@ -341,7 +391,7 @@ def main():
             # flip the bool associated with the char
             if options[arg] == False: options[arg] = True
             else: options[arg] = False
-        
+
         else:
             print(f"Invalid argument: '{arg}'")
             print(helpstring)
@@ -351,7 +401,7 @@ def main():
     if options["h"]:
         print(helpstring)
         return 0
-    
+ 
     # create nicole instance
     nicole = Nicole(test_run=options["t"], silent=options["s"], write_history=options["n"], ignore_history=options["i"], overwrite_tag=options["o"], recursive=options["r"], rm_explicit=options["rm_explicit"])
 

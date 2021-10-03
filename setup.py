@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
         name="nicole",
-        version="1.0",
+        version="1.1",
         description="Add lyrics from azlyrics.com to mp3-tag",
 
         author="Matthias Quintern",

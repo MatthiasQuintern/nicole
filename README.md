@@ -54,5 +54,10 @@ You can also install it system-wide using `sudo python3 -m pip install.`
 
 After installing, you can use it like this: `nicole -ior -d ~/music/artist --rm_explicit`
 
+## Changelog
+### 1.1
+- Lyrics are now properly encoded.
+- If a title contains paranthesis or umlaute, multiple possible urls will be checked.
+
 ## Importand Notice
 This software comes with no warranty!
