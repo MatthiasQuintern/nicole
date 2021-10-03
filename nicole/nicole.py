@@ -151,7 +151,6 @@ class Nicole:
         urls = []
         for title in titles:
             urls.append("https://azlyrics.com/lyrics/" + artist + '/' + title + ".html")
-        print(urls)
         return urls
 
 
