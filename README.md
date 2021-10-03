@@ -58,6 +58,7 @@ After installing, you can use it like this: `nicole -ior -d ~/music/artist --rm_
 ### 1.1
 - Lyrics are now properly encoded.
 - If a title contains paranthesis or umlaute, multiple possible urls will be checked.
+- Files are now processed in order
 
 ## Importand Notice
 This software comes with no warranty!

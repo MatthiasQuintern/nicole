@@ -205,7 +205,10 @@ class Nicole:
             print("\nProcessing directory: " + directory)
 
 
-        for entry in listdir(directory):
+        entries = listdir(directory)
+        entries.sort()
+
+        for entry in entries:
             entry = path.normpath(directory + "/" + entry)
 
             if path.isfile(entry):
