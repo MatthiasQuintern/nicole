@@ -33,7 +33,7 @@ class Nicole:
 
         self.write_history = write_history
         self.ignore_history = ignore_history
-        
+
         self.overwrite_tag = overwrite_tag
         self.recursive = recursive
 
@@ -107,6 +107,7 @@ class Nicole:
         # replace some stuff
         old = ['ä', 'ö', 'ü', '&']
         new = ['a', 'o', 'u', "and"]
+        # new2 = ['', '', '', "and"]
 
         for i in range(len(old)):
             title = title.replace(old[i], new[i])
@@ -121,23 +122,25 @@ class Nicole:
         # visit the url
         html = None
         try:
-            html = str(ur.urlopen(url).read())
+            html = str(ur.urlopen(url).read().decode("utf-8"))
             sleep(self.delay) # azlyrics blocks requests if there is no delay
         except Exception:
             sleep(self.delay) # azlyrics blocks requests if there is no delay
             return (False, f"Could not access url: {url}")
+        print(html)
 
         lyrics = None
-        match = re.search(r"<!\-\- Usage of azlyrics.com content by any third\-party lyrics provider is prohibited by our licensing agreement. Sorry about that. \-\->.+?</div>", html)
+        match = re.search(r"<!\-\- Usage of azlyrics.com content by any third\-party lyrics provider is prohibited by our licensing agreement. Sorry about that. \-\->(.|\n)+?</div>", html)
         if match:
             lyrics = match.group()
-            lyrics = lyrics.replace("<!-- Usage of azlyrics.com content by any third-party lyrics provider is prohibited by our licensing agreement. Sorry about that. -->", "")
-            lyrics = lyrics.replace("</div>", "")
-            lyrics = lyrics.replace("\n", "")
-            lyrics = lyrics.replace("\\n", "")
-            lyrics = lyrics.replace("\\r", "")
-            lyrics = lyrics.replace("\\", "")
-            lyrics = lyrics.replace("<br>", "\n")
+            for key, value in {
+                "<!-- Usage of azlyrics.com content by any third-party lyrics provider is prohibited by our licensing agreement. Sorry about that. -->": "",
+                "</div>": "",
+                "\n": "",
+                "<br>": "\n",
+            }.items():
+                lyrics = lyrics.replace(key, value)
+
             # remove all html tags
             for tag in re.finditer(r"<.+>", lyrics):
                 lyrics = lyrics.replace(tag.group(), "")
