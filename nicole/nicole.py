@@ -127,7 +127,6 @@ class Nicole:
         except Exception:
             sleep(self.delay) # azlyrics blocks requests if there is no delay
             return (False, f"Could not access url: {url}")
-        print(html)
 
         lyrics = None
         match = re.search(r"<!\-\- Usage of azlyrics.com content by any third\-party lyrics provider is prohibited by our licensing agreement. Sorry about that. \-\->(.|\n)+?</div>", html)
