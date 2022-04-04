@@ -30,7 +30,7 @@ Those files are not skipped, the file only exists so that you can see which lyri
 If you don't want your files in the history, add the `-n` option.
 
 ## genius
-Nicole searches for lyrics using the genius api using the "title" and "artist" tags of the file.
+Nicole searches for lyrics using the genius api with the "title" and "artist" tags of the file.
 If the title and artist names from genius and the tags are similar, the lyrics are scraped from the url obtained through the api.
 
 ## azlyrics
@@ -86,7 +86,7 @@ Example: `nicole -ior -d ~/music/artist --rm_explicit`
 To update nicole, simply follow the installation instructions.
 
 ## pacman (Arch Linux)
-Installing nicole using the Arch Build System also installs the man-page and a zsh completion script if you are using zsh as default shell.
+Installing nicole using the Arch Build System also installs the man-page and a zsh completion script, if you have zsh installed.
 ```shell
 git clone https://github.com/MatthiasQuintern/nicole.git
 cd nicole
@@ -94,7 +94,7 @@ makepkg -si
 ```
 
 ## pip
-Clone this repository and install it using python-pip.
+You can also install nicole with python-pip:
 ```shell
 git clone https://github.com/MatthiasQuintern/nicole.git
 cd nicole
@@ -105,13 +105,14 @@ You can also install it system-wide using `sudo python3 -m pip install.`
 If you also want to install the man-page and the zsh completion script:
 ```shell
 sudo cp nicole.1.man /usr/share/man/man1/nicole.1
+sudo gzip /usr/share/man/man1/nicole.1
 sudo cp _nicole.compdef.zsh /usr/share/zsh/site-functions/_nicole
 sudo chmod +x /usr/share/zsh/site-functions/_nicole
 ```
 
 ## Dependencies
-- https://github.com/seebye/mutagen: read and write mp3-tags
-- https://www.crummy.com/software/BeautifulSoup/: deal with the html from genius
+- https://github.com/quodlibet/mutagen read and write mp3-tags
+- https://www.crummy.com/software/BeautifulSoup deal with the html from genius
 
 The dependencies will be automatically installed when using the either of the two installation options.
 
