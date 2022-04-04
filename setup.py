@@ -2,8 +2,8 @@ from setuptools import setup
 
 setup(
         name="nicole",
-        version="1.1",
-        description="Add lyrics from azlyrics.com to mp3-tag",
+        version="2.0",
+        description="Write lyrics from genius or azlyrics.com to a mp3-tag",
 
         author="Matthias Quintern",
         author_email="matthiasqui@protonmail.com",
@@ -13,7 +13,7 @@ setup(
         license="GPLv3",
 
         packages=["nicole"],
-        install_requires=["mutagen"],
+        install_requires=["mutagen", "beautifulsoup4"],
 
         classifiers=[
             "Operating System :: POSIX :: Linux",
@@ -28,5 +28,3 @@ setup(
             "console_scripts": [ "nicole=nicole.nicole:main" ],
             },
 )
-
-
