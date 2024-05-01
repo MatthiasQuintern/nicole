@@ -82,15 +82,13 @@ class Nicole:
     def _write_history(self):
         config_path = path.expanduser("~") + "/.config/nicole/"
 
-        history_file = open(config_path + "history", "w")
-        for file in self.history:
-            history_file.write(file + "\n")
-        history_file.close()
+        with open(config_path + "history", "w") as history_file:
+            for file in self.history:
+                history_file.write(file + "\n")
 
-        failed_file = open(config_path + "failed", "w")
-        for file in self.failed:
-            failed_file.write(file + "\n")
-        failed_file.close()
+        with open(config_path + "failed", "w") as failed_file:
+            for file in self.failed:
+                failed_file.write(file + "\n")
 
     def get_urls_azlyrics(self, artist:str, title:str):
         """
@@ -314,6 +312,8 @@ class Nicole:
                         else:
                             print(f"✕ {entry}")
                         print("    " + message)
+                    print("History\n", self.history)
+                    print("Failed\n", self.failed)
 
 
             elif path.isdir(entry) and self.recursive:
@@ -419,10 +419,6 @@ class Nicole:
                     audio.save()
                 else:
                     return (False, f"Could find lyrics but failed to write the tag.")
-
-                # add to history
-                if self.write_history and file not in self.history:
-                    self.history.append(file)
 
             message += f"Written lyrics from {site} to {artist} - {title}"
             return (True, message)
