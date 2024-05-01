@@ -15,16 +15,16 @@ _nicole()
     # option[description]:message:action
     # # -s allow stacking, eg -inr
     _arguments -s \
-        '-d[process directory]':directory:_directories \
-        '-f[process file]':file:_files \
-        '-r[go through directories recursively]' \
-        '-s[silent]' \
-        '-i[ignore history]' \
-        '-n[do not write to history]' \
-        '-o[overwrite if the file already has lyrics]' \
-        '-t[test, only print lyrics, dont write to tags]' \
-        '-h[show this]' \
-        '--rm_explicit[remove the "Explicit" lyrics warning from the title tag]' \
-        '--site[specify lyrics site]':lyrics-site:_lyrics-site
+        {--directory,-d}'[process directory]':directory:_directories \
+        {--file,-f}'[process file]':file:_files \
+        {--recursive,-r}'[go through directories recursively]' \
+        {--silent}'[silent]' \
+        {--ignore-history,-i}'[ignore history]' \
+        {--no-history,-n]}'[do not write to history]' \
+        {--overwrite,-o}'[overwrite if the file already has lyrics]' \
+        {--dry-run,-t}'[test, only print lyrics, dont write to tags]' \
+        '--help[show this]' \
+        '--rm-explicit[remove the "Explicit" lyrics warning from the title tag]' \
+        {--site,-s}'[specify lyrics site]':lyrics-site:_lyrics-site
 }
 _nicole "$@"

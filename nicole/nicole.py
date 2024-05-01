@@ -10,10 +10,13 @@ import re
 from bs4 import BeautifulSoup
 from difflib import SequenceMatcher
 from json import loads
+import argparse
 
 from os import path, getcwd, listdir, mkdir
 from time import sleep
 from sys import argv
+
+version = "2.1.0"
 
 # Der Name Nicole ist frei erfunden und hat keine Bedeutung.
 # Jeglicher Zusammenhang mit einer Website der DHL wird hiermit ausdrücklich ausgeschlossen.
@@ -31,9 +34,13 @@ class Nicole:
     azlyrics:
         Nicole creates a azlyrics url from the title and artist mp3-tags of the file.
         The lyrics are extracted from the html document using regex.
+    genius:
+        Nicole searches the song from the title and artist mp3-tags via the genius api.
     """
+    allowed_extensions = [".mp3", ".flac"]
+
     def __init__(self, test_run=False, silent=False, write_history=True, ignore_history=False, overwrite_tag=False, recursive=False, rm_explicit=False, lyrics_site="all"):
-        self.test_run = test_run
+        self.dry_run = test_run
         self.silent = silent
 
         self.write_history = write_history
@@ -233,14 +240,14 @@ class Nicole:
                     genius_artist_featured = results[i]["result"]["artist_names"]
                     genius_title = results[i]["result"]["title"]
                     genius_title_featured = results[i]["result"]["title_with_featured"]
-                    if SequenceMatcher(None, title, genius_title).ratio() < self.sanity_min_title_ratio:
-                        if SequenceMatcher(None, title, genius_title_featured).ratio() < self.sanity_min_title_ratio:
+                    if SequenceMatcher(None, title.lower(), genius_title.lower()).ratio() < self.sanity_min_title_ratio:
+                        if SequenceMatcher(None, title.lower(), genius_title_featured.lower()).ratio() < self.sanity_min_title_ratio:
                             message += f"Genius result: titles do not match enough: '{title}' and '{genius_title}'/'{genius_title_featured}'\n    "
                             i += 1
                             continue
 
-                    if SequenceMatcher(None, artist, genius_artist).ratio() < self.sanity_min_artist_ratio:
-                        if SequenceMatcher(None, artist, genius_artist_featured).ratio() < self.sanity_min_artist_ratio:
+                    if SequenceMatcher(None, artist.lower(), genius_artist.lower()).ratio() < self.sanity_min_artist_ratio:
+                        if SequenceMatcher(None, artist.lower(), genius_artist_featured.lower()).ratio() < self.sanity_min_artist_ratio:
                             message += f"Genius result: artists do not match enough: '{artist}' and '{genius_artist}'/'{genius_artist_featured}'\n    "
                             i += 1
                             continue
@@ -278,6 +285,10 @@ class Nicole:
         return (True, lyrics)
 
     def process_dir(self, directory):
+        f"""
+        Process all files from <directory> having a {Nicole.allowed_extensions} fileextension.
+        If recursive, call process_dir for subdirectories.
+        """
         if not path.isabs(directory):
             directory = path.normpath(getcwd() + "/" + directory)
         if not path.isdir(directory):
@@ -296,30 +307,40 @@ class Nicole:
                 extension = path.splitext(entry)[1]
 
                 # if sound file with mp3 tags
-                if extension in [".mp3", ".flac"]:
-                    success, message = self.process_file(entry)
-
-                    # add to history
-                    if self.write_history:
-                        if entry not in self.history:
-                            self.history.append(entry)
-                        if not success:
-                            self.failed.append(entry)
-
-                    if not self.silent:
-                        if success:
-                            print(f"✓ {entry}") 
-                        else:
-                            print(f"✕ {entry}")
-                        print("    " + message)
-                    print("History\n", self.history)
-                    print("Failed\n", self.failed)
-
+                if extension in Nicole.allowed_extensions:
+                    self.process_file(entry)
 
             elif path.isdir(entry) and self.recursive:
                 self.process_dir(entry)
 
+
     def process_file(self, file):
+        """
+        process a file, append to history and print a message (depending on settings)
+        """
+        success, message = self._process_file(file)
+
+        # add to history
+        if self.write_history:
+            if file not in self.history:
+                self.history.append(file)
+            if not success:
+                self.failed.append(file)
+
+        if not self.silent:
+            if success:
+                print(f"✓ {file}")
+            else:
+                print(f"✕ {file}")
+            print("    " + message)
+        # print("History\n", self.history)
+        # print("Failed\n", self.failed)
+
+
+    def _process_file(self, file):
+        """
+        search for tags, write them to the file (if not dry run) and return wether successful or not and a message
+        """
         if not path.isabs(file):
             file = path.normpath(getcwd() + "/" + file)
         if not path.isfile(file):
@@ -407,7 +428,7 @@ class Nicole:
                 message += lyrics
         # if found lyrics
         if success:
-            if self.test_run:
+            if self.dry_run:
                 print(f"\n\n{artist} - {title}:\n{lyrics}\n")
             # write to tags
             else:
@@ -418,7 +439,7 @@ class Nicole:
                     audio["LYRICS"] = lyrics
                     audio.save()
                 else:
-                    return (False, f"Could find lyrics but failed to write the tag.")
+                    return (False, f"Could find lyrics but failed to write the tag (unknown audio type: {type(audio)})")
 
             message += f"Written lyrics from {site} to {artist} - {title}"
             return (True, message)
@@ -427,106 +448,40 @@ class Nicole:
 
 
 def main():
-    print("Nicole version 2.0")
+    print(f"Nicole version {version}")
 
-    helpstring = """Command line options:
-    -d [directory]      process directory [directory]
-    -f [file]           process file [file]
-    -r                  go through directories recursively
-    -s                  silent, no command-line output
-    -i                  ignore history
-    -n                  do not write to history
-    -o                  overwrite if the file already has lyrics
-    -t                  test, do not write lyrics to file, but print to console
-    -h                  show this
-    --rm_explicit       remove the "[Explicit]" lyrics warning from the songs title tag
-    --site [site]       use only [site]: azlyrics or genius
-    Visit https://github.com/MatthiasQuintern/nicole for updates and further help."""
-    args = []
-    if len(argv) > 1:
-        # iterate over argv list and extract the args
-        i = 1
-        while i < len(argv):
-            arg = argv[i]
-            if arg[0] == "-":
-                # check if option with arg, if yes add tuple to args
-                if len(argv) > i + 1 and argv[i+1][0] != "-":
-                    args.append((arg.replace("-", ""), argv[i+1]))
-                    i += 1
-                elif not "--" in arg:
-                    for char in arg.replace("-", ""):
-                        args.append(char)
-                else:
-                    args.append(arg.replace("-", ""))
-            else:
-                print(f"Invalid or missing argument: '{arg}'")
-                print(helpstring)
-                return 1
+    parser = argparse.ArgumentParser(prog="nicole", description="lyrics scraper and embedder", epilog="https://github.com/MatthiasQuinter/nicole")
+    parser.add_argument("--directory", "-d",        action="append",     help="process directory [directory]")
+    parser.add_argument("--file", "-f",             action="append",     help="process file [file]")
+    parser.add_argument("--recursive", "-r",        action="store_true", help="go through directories recursively")
+    parser.add_argument("--silent",                 action="store_true", help="silent, no command-line output")
+    parser.add_argument("--ignore-history", "-i",   action="store_true", help="ignore history")
+    parser.add_argument("--no-history", "-n",       action="store_true", help="do not write to history")
+    parser.add_argument("--overwrite", "-o",        action="store_true", help="overwrite if the file already has lyrics")
+    parser.add_argument("--dry-run", "-t",          action="store_true", help="test, do not write lyrics to file, but print to console")
+    parser.add_argument("--rm-explicit",            action="store_true", help="remove the \"[Explicit]\" lyrics warning from the songs title tag")
+    parser.add_argument("--site", "-s",             action="store",      help="use only [site]: azlyrics or genius", default="all")
+    args = parser.parse_args()
 
-            i += 1
-
-    options = {
-            "t": False,
-            "s": False,
-            "n": True,
-            "i": False,
-            "o": False,
-            "r": False,
-            "h": False,
-            "rm_explicit": False,
-            }
-
-    directory = None
-    file = None
-    site = "all"
-
-    for arg in args:
-        if type(arg) == tuple:
-            if arg[0] == "d": directory = arg[1]
-            elif arg[0] == "f": file = arg[1]
-            elif arg[0] == "site":
-                if arg[1] in ["genius", "azlyrics", "all"]: site = arg[1]
-                else:
-                    print(f"Invalid site: '{arg[1]}'")
-
-        elif arg in options.keys():
-            # flip the bool associated with the char
-            if options[arg] == False: options[arg] = True
-            else: options[arg] = False
-
-        else:
-            print(f"Invalid argument: '{arg}'")
-            print(helpstring)
-            return 1
-
-    # show help
-    if options["h"]:
-        print(helpstring)
-        return 0
+    if args.file is None and args.directory is None:
+        parser.error("Either --directory or --file is required")
 
     # create nicole instance
-    nicole = Nicole(test_run=options["t"], silent=options["s"], write_history=options["n"], ignore_history=options["i"], overwrite_tag=options["o"], recursive=options["r"], rm_explicit=options["rm_explicit"], lyrics_site=site)
+    nicole = Nicole(test_run=args.dry_run, silent=args.silent, write_history=not args.no_history, ignore_history=args.ignore_history, overwrite_tag=args.overwrite,
+                            recursive=args.recursive, rm_explicit=args.rm_explicit, lyrics_site=args.site)
 
-    # start with file or directory
-    if file:
-        success, message = nicole.process_file(file)
-        if not nicole.silent:
-            if success:
-                print(f"✓ {file}") 
-            else:
-                print(f"✕ {file}")
-            print("    " + message)
-    elif directory:
-        try:
-            nicole.process_dir(directory)
-        except KeyboardInterrupt:
-            print("")
-    else:
-        use_wdir = input("No file or directory given. Use working directory? (y/n): ")
-        if use_wdir in "yY":
-            nicole.process_dir(getcwd())
-        else:
-            print(helpstring)
+    if type(args.file) == list:
+        for file in args.file:
+            try:
+                nicole.process_file(file)
+            except KeyboardInterrupt:
+                pass
+    if type(args.directory) == list:
+        for directory in args.directory:
+            try:
+                nicole.process_dir(directory)
+            except KeyboardInterrupt:
+                pass
 
 
 if __name__ == "__main__":
