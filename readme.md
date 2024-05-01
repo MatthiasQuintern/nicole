@@ -87,6 +87,8 @@ The dependencies will be automatically installed when using the either of the tw
 ## Changelog
 ### 2.0
 - Nicole now supports lyrics from genius!
+- Added man-page
+- Added zsh-completion
 
 ### 1.1
 - Lyrics are now properly encoded.
