@@ -1,6 +1,6 @@
-# Maintainer: Matthias Quintern <matthiasqui@protonmail.com>
+# Maintainer: Matthias Quintern <matthias(dot)quintern(at)posteo(dot)de>
 pkgname=nicole
-pkgver=2.0
+pkgver=2.1.0
 pkgrel=1
 pkgdesc="Write lyrics from genius or azlyrics.com to a mp3-tag"
 arch=('any')
@@ -8,7 +8,9 @@ url="https:/github.com/MatthiasQuintern/nicole"
 license=('GPL3')
 depends=('python-mutagen' 'python-beautifulsoup4')
 source=(file://${PWD}/nicole/nicole.py _nicole.compdef.zsh nicole.1.man)
-md5sums=(93752797fc2bca526fbfd32611518065 f3b46bdcaba5e7fc23bbacc6b2e153c0 8c3b8e5c90afdc8993ebab78d48f5668)
+md5sums=('1cfc6bca38b8e1b8c28694226eebb31e'
+         'a0a390f36de74a366065ab65bfd1d8de'
+         '8c3b8e5c90afdc8993ebab78d48f5668')
 
 package() {
 	mkdir -p "${pkgdir}/usr/bin"
