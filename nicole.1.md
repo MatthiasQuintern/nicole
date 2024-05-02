@@ -1,6 +1,6 @@
-% NICOLE(1) nicole 2.0
+% NICOLE(1) nicole 2.1.0
 % Matthias Quintern
-% April 2022
+% May 2024
 
 # NAME
 **N**ew-**I**ntrepid-**C**hief-**O**f-**L**yrics-**E**mbedders (obviously)
@@ -31,56 +31,52 @@ If you don't want your files in the history, add the `-n` option.
 
 ## genius
 Nicole searches for lyrics using the genius api with the "title" and "artist" tags of the file.
-If the title and artist names from genius and the tags are similar, the lyrics are scraped from the url obtained through the api.
+If the title and artist names from genius are similar enough to the ones of the file,
+the lyrics are scraped from the url obtained through the api.
 
 ## azlyrics
 Nicole creates an azlyrics.com url from the "title" and "artist" tags of the file.
 The lyrics are extracted from the html document using regex.
 
-Unfortunately, there needs to be a 5 second delay between each request to azlyrics.com because the site will block your ip for a while if you send many requests.
+Unfortunately, there needs to be a 5 second delay between each request to azlyrics.com because 
+the site will block your ip for a while if you send many requests.
 
-## Important Note
-Since the lyrics are extracted from html pages and not from an api, the lyrics sites might temporarily block your ip address if you send too many requests.
-If that is the case, wait a few hours and try again.
 
 # USAGE
 
 ## Command line options
-**-d** directory
+**--directory**, **-d** directory
 : process directory [directory]
 
-**-f** file
+**--file**, **-f** file
 : process file [file]
 
-**-r**
+**--recursive**, **-r**
 : go through directories recursively
 
-**-s**
+**--silent**
 : silent, no command-line output
 
-**-i**
+**--ignore-history**, **-i**
 : ignore history
 
-**-n**
+**--no-history**, **-n**
 : do not write to history
 
-**-o**
+**--overwrite**, **-o**
 : overwrite if the file already has lyrics
 
-**-t**
+**--test**, **-t**
 : test, do not write lyrics to file, but print to stdout
 
-**-h**
-: show this
-
-**--rm_explicit**
+**--rm-explicit**
 : remove the "[Explicit]" lyrics warning from the song's title tag
 
-**--site** site
+**--site**, **-s** site
 : onlysearch [site] for lyrics (genius or azlyrics)
 
-If you do not specify a directory or file, the program will ask you if you want to use the current working directory.
-Example: `nicole -ior -d ~/music/artist --rm_explicit`
+One of `--file` and `--directory` must be given at least once.
+Example: `nicole -ior -d ~/music/artist --rm-explicit`
 
 # INSTALLATION AND UPDATING
 To update nicole, simply follow the installation instructions.
@@ -117,6 +113,12 @@ sudo chmod +x /usr/share/zsh/site-functions/_nicole
 The dependencies will be automatically installed when using the either of the two installation options.
 
 # CHANGELOG
+## 2.1.0
+- Refactoring:
+    - use argparse
+    - use pyproject.toml
+- Ignore case when matching a genius result
+
 ## 2.0
 - Nicole now supports lyrics from genius!
 - Added man-page
@@ -128,5 +130,5 @@ The dependencies will be automatically installed when using the either of the tw
 - Files are now processed in order
 
 # COPYRIGHT
-Copyright  ©  2022  Matthias  Quintern.  License GPLv3+: GNU GPL version 3 <https://gnu.org/licenses/gpl.html>.\
+Copyright  ©  2024  Matthias  Quintern.  License GPLv3+: GNU GPL version 3 <https://gnu.org/licenses/gpl.html>.\
 This is free software: you are free to change and redistribute it.  There is NO WARRANTY, to the extent permitted by law.

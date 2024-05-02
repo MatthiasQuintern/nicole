@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
         name="nicole",
-        version="2.0",
+        version="2.1.0",
         description="Write lyrics from genius or azlyrics.com to a mp3-tag",
 
         author="Matthias Quintern",

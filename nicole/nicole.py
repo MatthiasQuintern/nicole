@@ -1,5 +1,5 @@
 #!/bin/python3
-# Copyright ©  2022 Matthias Quintern.
+# Copyright © 2024 Matthias Quintern.
 # This software comes with no warranty.
 # This software is licensed under the GPL3
 
