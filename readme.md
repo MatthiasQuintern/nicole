@@ -10,7 +10,7 @@ Files that do not have a .flac or .mp3 extension are skipped automatically.
 - mp3: lyrics are stored in "USLT" tag as "lyrics-   "
 - flac: lyrics are stored as vorbis-comment with key "LYRICS"
 
-### History
+## History
 Nicole creates a history of all files that were processed in `~/.configs/nicole`.
 If a file is in the history, it will be skipped (unless `-i` is passed).
 If the lyrics for a file can not be obtained, it is added to `~/.configs/nicole/failed_files`.
@@ -18,37 +18,35 @@ Those files are not skipped, the file only exists so that you can see which lyri
 
 If you don't want your files in the history, add the `-n` option.
 
-### genius
+## genius
 Nicole searches for lyrics using the genius api with the "title" and "artist" tags of the file.
-If the title and artist names from genius and the tags are similar, the lyrics are scraped from the url obtained through the api.
+If the title and artist names from genius are similar enough to the ones of the file,
+the lyrics are scraped from the url obtained through the api.
 
-### azlyrics
+## azlyrics
 Nicole creates an azlyrics.com url from the "title" and "artist" tags of the file.
 The lyrics are extracted from the html document using regex.
 
-Unfortunately, there needs to be a 5 second delay between each request to azlyrics.com because the site will block your ip for a while if you send many requests.
-
-### Important Note
-Since the lyrics are extracted from html pages and not from an api, the lyrics sites might temporarily block your ip address if you send too many requests.
-If that is the case, wait a few hours and try again.
+Unfortunately, there needs to be a 5 second delay between each request to azlyrics.com because 
+the site will block your ip for a while if you send many requests.
 
 ## Usage
 
 ### Command line options
-- `-d [directory]` process directory [directory]
-- `-f [file]` process file [file]
-- `-r` go through directories recursively
-- `-s` silent, no command-line output
-- `-i` ignore history
-- `-n` do not write to history
-- `-o` overwrite if the file already has lyrics
-- `-t` test, do not write lyrics to file, but print to stdout
-- `-h` show this
-- `--rm_explicit` remove the "[Explicit]" lyrics warning from the song's title tag
-- `--site [site]` only search [site] for lyrics (genius or azlyrics)
+- `--directory DIRECTORY, -d DIRECTORY`
+                          process directory [directory]
+- `--file FILE, -f FILE`  process file [file]
+- `--recursive, -r`       go through directories recursively
+- `--silent`              silent, no command-line output
+- `--ignore-history, -i`  ignore history
+- `--no-history, -n`      do not write to history
+- `--overwrite, -o`       overwrite if the file already has lyrics
+- `--dry-run, -t`         test, do not write lyrics to file, but print to console
+- `--rm-explicit`         remove the "[Explicit]" lyrics warning from the songs title tag
+- `--site SITE, -s SITE`  use only [site]: azlyrics or genius
 
-If you do not specify a directory or file, the program will ask you if you want to use the current working directory.
-Example: `nicole -ior -d ~/music/artist --rm_explicit`
+
+Example: `nicole -ior -d ~/music/artist --rm-explicit`
 
 ## Installation and Updating
 To update nicole, simply follow the installation instructions.
@@ -85,6 +83,12 @@ sudo chmod +x /usr/share/zsh/site-functions/_nicole
 The dependencies will be automatically installed when using the either of the two installation options.
 
 ## Changelog
+## 2.1.0
+- Refactoring:
+    - use argparse
+    - use pyproject.toml
+- Ignore case when matching a genius result
+
 ### 2.0
 - Nicole now supports lyrics from genius!
 - Added man-page
@@ -96,5 +100,5 @@ The dependencies will be automatically installed when using the either of the tw
 - Files are now processed in order
 
 # Copyright
-Copyright  ©  2022  Matthias  Quintern.  License GPLv3+: GNU GPL version 3 <https://gnu.org/licenses/gpl.html>.\
+Copyright  ©  2024  Matthias  Quintern.  License GPLv3+: GNU GPL version 3 <https://gnu.org/licenses/gpl.html>.\
 This is free software: you are free to change and redistribute it.  There is NO WARRANTY, to the extent permitted by law.
