@@ -10,7 +10,7 @@ depends=('python-mutagen' 'python-beautifulsoup4')
 source=(file://${PWD}/nicole/nicole.py _nicole.compdef.zsh nicole.1.man)
 md5sums=('1cfc6bca38b8e1b8c28694226eebb31e'
          'a0a390f36de74a366065ab65bfd1d8de'
-         '8c3b8e5c90afdc8993ebab78d48f5668')
+         '4ad29357b608c88eebc49546a50e489d')
 
 package() {
 	mkdir -p "${pkgdir}/usr/bin"
