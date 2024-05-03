@@ -1,23 +1,34 @@
 [build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["setuptools"]
 
-[tool.setuptools]
+[project]
 name = "nicole"
 version = "2.1.0"
 description = "Write lyrics from genius or azlyrics.com into a mp3-tag"
-author = "Matthias Quintern"
-author_email = "matthias.quintern@posteo.de"
-url = "https://github.com/MatthiasQuintern/nicole.git"
-license = "GPLv3"
-packages = ["nicole"]
-install_requires = ["mutagen", "beautifulsoup4"]
+authors = [ 
+    { name = "Matthias Quintern", email = "matthias.quintern@posteo.de" }
+]
+requires-python = ">=3.7"
 
-[tool.setuptools.entry-points]
-console_scripts = ["nicole=nicole.nicole:main"]
+license = { file = "LICENSE" }
+dependencies = [
+    "mutagen",
+    "beautifulsoup4"
+]
 
-[tool.setuptools.metadata]
-description-file = "readme.md"
+classifiers = [
+    "Operating System :: POSIX :: Linux",
+    "Environment :: Console",
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+]
+
+[project.urls]
+repository = "https://github.com/MatthiasQuintern/nicole.git"
+
+[project.scripts]
+nicole = "nicole.nicole:main"
 
 [tool.setuptools.packages.find]
-where = "."
+where = ["."]
+
