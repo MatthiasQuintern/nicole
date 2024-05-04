@@ -1,11 +1,11 @@
-#!/bin/python3
+#!/usr/bin/env python3
 # Copyright © 2024 Matthias Quintern.
 # This software comes with no warranty.
 # This software is licensed under the GPL3
 
 from mutagen import easyid3, id3, flac
 
-import urllib
+import urllib.parse, urllib.request, urllib.error
 import re
 from bs4 import BeautifulSoup
 from difflib import SequenceMatcher
