@@ -18,7 +18,7 @@ _nicole()
         {--directory,-d}'[process directory]':directory:_directories \
         {--file,-f}'[process file]':file:_files \
         {--recursive,-r}'[go through directories recursively]' \
-        {--silent}'[silent]' \
+        '--silent[silent]' \
         {--ignore-history,-i}'[ignore history]' \
         {--no-history,-n]}'[do not write to history]' \
         {--overwrite,-o}'[overwrite if the file already has lyrics]' \
