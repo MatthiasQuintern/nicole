@@ -83,7 +83,10 @@ sudo chmod +x /usr/share/zsh/site-functions/_nicole
 The dependencies will be automatically installed when using the either of the two installation options.
 
 ## Changelog
-## 2.1.0
+#### 2.1.1
+- Fix: handle `~` in paths
+
+### 2.1.0
 - Refactoring:
     - use argparse
     - use pyproject.toml

@@ -1,6 +1,6 @@
 # Maintainer: Matthias Quintern <matthias(dot)quintern(at)posteo(dot)de>
 pkgname=nicole
-pkgver=2.1.0
+pkgver=2.1.1
 pkgrel=3
 pkgdesc="Write lyrics from genius or azlyrics.com to a mp3-tag"
 arch=('any')

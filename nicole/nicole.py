@@ -16,7 +16,7 @@ from os import path, getcwd, listdir, mkdir
 from time import sleep
 from sys import argv
 
-version = "2.1.0"
+version = "2.1.1"
 
 # Der Name Nicole ist frei erfunden und hat keine Bedeutung.
 # Jeglicher Zusammenhang mit einer Website der DHL wird hiermit ausdrücklich ausgeschlossen.
@@ -471,13 +471,13 @@ def main():
                             recursive=args.recursive, rm_explicit=args.rm_explicit, lyrics_site=args.site)
 
     if type(args.file) == list:
-        for file in args.file:
+        for file in map(path.expanduser, args.file):
             try:
                 nicole.process_file(file)
             except KeyboardInterrupt:
                 pass
     if type(args.directory) == list:
-        for directory in args.directory:
+        for directory in map(path.expanduser, args.directory):
             try:
                 nicole.process_dir(directory)
             except KeyboardInterrupt:
