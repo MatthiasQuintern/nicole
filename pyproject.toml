@@ -3,7 +3,7 @@ requires = ["setuptools"]
 
 [project]
 name = "nicole"
-version = "2.1.1"
+version = "2.1.2"
 description = "Write lyrics from genius or azlyrics.com into a mp3-tag"
 authors = [ 
     { name = "Matthias Quintern", email = "matthias.quintern@posteo.de" }

@@ -83,6 +83,10 @@ sudo chmod +x /usr/share/zsh/site-functions/_nicole
 The dependencies will be automatically installed when using the either of the two installation options.
 
 ## Changelog
+#### 2.1.2
+- Fix: Genius 403
+- Add: `debug` logging
+
 #### 2.1.1
 - Fix: handle `~` in paths
 
@@ -103,5 +107,5 @@ The dependencies will be automatically installed when using the either of the tw
 - Files are now processed in order
 
 # Copyright
-Copyright  ©  2024  Matthias  Quintern.  License GPLv3+: GNU GPL version 3 <https://gnu.org/licenses/gpl.html>.\
+Copyright  ©  2026  Matthias  Quintern.  License GPLv3+: GNU GPL version 3 <https://gnu.org/licenses/gpl.html>.\
 This is free software: you are free to change and redistribute it.  There is NO WARRANTY, to the extent permitted by law.

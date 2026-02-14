@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Copyright © 2024 Matthias Quintern.
+# Copyright © 2026 Matthias Quintern.
 # This software comes with no warranty.
 # This software is licensed under the GPL3
 import logging

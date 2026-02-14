@@ -8,9 +8,7 @@ url="https:/github.com/MatthiasQuintern/nicole"
 license=('GPL3')
 depends=('python-mutagen' 'python-beautifulsoup4')
 source=(file://${PWD}/nicole/nicole.py _nicole.compdef.zsh nicole.1.man)
-md5sums=('b72bfd6aefe9c1f28015f896c64535ad'
-         '52e446aa13ae481eece1935bceece193'
-         '4ad29357b608c88eebc49546a50e489d')
+sha256sums=(ec362dc4f625c689d93b5caa2aef9091cfd87577c7dcf41afada18882b7a9802 2a872b395b8ac68243b5f5e53a79486a9b12b8fca890a02472c833bd427208b9 363d1cbefae32c4fadcfd521e3c890691817285e6cce3cfbe6f4e3b2b644a9e2)
 
 package() {
 	mkdir -p "${pkgdir}/usr/bin"
