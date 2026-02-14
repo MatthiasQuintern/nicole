@@ -2,6 +2,8 @@
 # Copyright © 2024 Matthias Quintern.
 # This software comes with no warranty.
 # This software is licensed under the GPL3
+import logging
+log = logging.getLogger(__name__)
 
 from mutagen import easyid3, id3, flac
 
@@ -17,6 +19,7 @@ from time import sleep
 from sys import argv
 
 version = "2.1.1"
+
 
 # Der Name Nicole ist frei erfunden und hat keine Bedeutung.
 # Jeglicher Zusammenhang mit einer Website der DHL wird hiermit ausdrücklich ausgeschlossen.
@@ -54,7 +57,7 @@ class Nicole:
 
         self.genius_search = "https://api.genius.com/search?q="
         self.genius_song = "https://api.genius.com/songs/"
-        self.genius_access_token = "MzQaNvA53GOGvRTV8OXUbq2NCMahcnVre5EZmj-OcSjVleVO4kNwMVZicPsD5AL7"
+        self.genius_access_token = "vOqO39PH_N-R3JQY-4_qEX42BXLiSdAqYTcG-Az1LUq2HLIJhpfXSzJOvAAJoN8Y"
 
         self.sanity_checks = True
         self.sanity_min_title_ratio = 0.6
@@ -183,7 +186,8 @@ class Nicole:
             try:
                 html = str(urllib.request.urlopen(url).read().decode("utf-8"))
                 sleep(self.delay) # azlyrics blocks requests if there is no delay
-            except Exception:
+            except Exception as e:
+                log.info(f"Opening URL='{url}' failed: {type(e)}: {e}")
                 sleep(self.delay) # azlyrics blocks requests if there is no delay
                 message += f"Could not access url: {url}\n    "
                 continue
@@ -224,8 +228,10 @@ class Nicole:
         request_search.add_header("Authorization", f"Bearer {self.genius_access_token}")
         try:
             results = loads(urllib.request.urlopen(request_search).read())["response"]["hits"]
-        except urllib.error.URLError:
+        except urllib.error.URLError as e:
+            log.info(f"Opening URL='{request_search}' failed: {e}")
             return (False, f"Could not access url: {query_search}")
+        log.debug(f"results from genius: {results}")
 
         message = ""
         url = None
@@ -266,10 +272,12 @@ class Nicole:
     def get_lyrics_genius(self, url):
         request_lyrics = urllib.request.Request(url)
         # request_lyrics.add_header("Authorization", f"Bearer {self.genius_access_token}")
-        request_lyrics.add_header("User-Agent", "Mozilla/5.0")
+        # It seems like you have to use a recent realistic user agent, otherwise they block access
+        request_lyrics.add_header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.3")
         try:
             html = urllib.request.urlopen(request_lyrics).read()
-        except urllib.error.URLError:
+        except urllib.error.URLError as e:
+            log.info(f"Opening URL='{url}' failed: {e}")
             return (False, f"Could not access url: {url}")
 
         # extract lyrics from html: lyrics are in divs with "data-lyrics-container=true"
@@ -450,6 +458,7 @@ class Nicole:
 def main():
     print(f"Nicole version {version}")
 
+
     parser = argparse.ArgumentParser(prog="nicole", description="lyrics scraper and embedder", epilog="https://github.com/MatthiasQuinter/nicole")
     parser.add_argument("--directory", "-d",        action="append",     help="process directory [directory]")
     parser.add_argument("--file", "-f",             action="append",     help="process file [file]")
@@ -461,7 +470,21 @@ def main():
     parser.add_argument("--dry-run", "-t",          action="store_true", help="test, do not write lyrics to file, but print to console")
     parser.add_argument("--rm-explicit",            action="store_true", help="remove the \"[Explicit]\" lyrics warning from the songs title tag")
     parser.add_argument("--site", "-s",             action="store",      help="use only [site]: azlyrics or genius", default="all")
+    parser.add_argument("--debug",                  action="store_true", help="enable debug logging", default="all")
     args = parser.parse_args()
+
+    log_format = "%(asctime)s [%(levelname)s] [%(name)s/%(funcName)s] %(message)s"
+    log_stdout = logging.StreamHandler()
+    logger = logging.getLogger()  # root logger
+    logger.addHandler(log_stdout)
+    try:
+        from mqutil.log import ColorFormatter
+        log_stdout.setFormatter(ColorFormatter(log_format))
+    except ImportError:
+        log.debug(f"Failed to import ColorFormatter from mqutil")
+
+    if args.debug:
+        logger.setLevel(logging.DEBUG)
 
     if args.file is None and args.directory is None:
         parser.error("Either --directory or --file is required")
